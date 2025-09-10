@@ -18,17 +18,19 @@ import { Comment } from './comments/comment.entity';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'ep-billowing-shadow-a8nd5657-pooler.eastus2.azure.neon.tech',
-      username: 'neondb_owner',
-      password: 'npg_ptn5e3CYmIUR',
-      database: 'neondb',
+      host: process.env.DB_HOST,
+      port: parseInt(process.env.DB_PORT, 10),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
       entities: [User, Project, Task, Comment],
-      synchronize: false,
+      synchronize: false, // never use true in production
       ssl: {
-        rejectUnauthorized: false, // required for Neon cloud connections
+        rejectUnauthorized: false, // required for Supabase
       },
       extra: {
-        channelBinding: 'require', // maps to channel_binding=require
+        // Optional but recommended for cloud connections
+        channelBinding: 'require',
       },
     }),
     AuthModule,
