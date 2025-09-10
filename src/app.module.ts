@@ -18,13 +18,18 @@ import { Comment } from './comments/comment.entity';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '5432'),
-      username: process.env.DB_USER || 'postgres',
-      password: process.env.DB_PASS || 'postgres',
-      database: process.env.DB_NAME || 'postgres',
+      host: 'ep-billowing-shadow-a8nd5657-pooler.eastus2.azure.neon.tech',
+      username: 'neondb_owner',
+      password: 'npg_ptn5e3CYmIUR',
+      database: 'neondb',
       entities: [User, Project, Task, Comment],
-      synchronize: true,
+      synchronize: false,
+      ssl: {
+        rejectUnauthorized: false, // required for Neon cloud connections
+      },
+      extra: {
+        channelBinding: 'require', // maps to channel_binding=require
+      },
     }),
     AuthModule,
     UsersModule,
