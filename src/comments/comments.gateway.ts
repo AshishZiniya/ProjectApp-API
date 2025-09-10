@@ -9,7 +9,7 @@ import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({
   cors: {
-    origin: ['http://localhost:3000', 'http://localhost:3001'], // adjust if needed
+    origin: ['https://project-app-indol.vercel.app'], // adjust if needed
   },
 })
 export class CommentsGateway {
