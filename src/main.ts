@@ -13,9 +13,7 @@ async function bootstrap() {
     credentials: true,
   });
   await app.listen(process.env.PORT ?? 4000, () => {
-    console.log(
-      `Server is running on https://projectapp-api.netlify.app`,
-    );
+    console.log(`Server is running on https://projectapp-api.netlify.app`);
   });
 }
 void bootstrap();
