@@ -149,14 +149,14 @@ export class AuthController {
     // For production with different domains, consider 'none' and 'true' (requires HTTPS).
     res.cookie('accessToken', access, {
       httpOnly: true,
-      sameSite: 'lax', // Can be 'none' if frontend and backend are different domains and secure: true
-      secure: false, // Should be true in production with HTTPS
+      sameSite: 'none', // Can be 'none' if frontend and backend are different domains and secure: true
+      secure: true, // Should be true in production with HTTPS
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     res.cookie('refreshToken', refresh, {
       httpOnly: true,
-      sameSite: 'lax', // Can be 'none' if frontend and backend are different domains and secure: true
-      secure: false, // Should be true in production with HTTPS
+      sameSite: 'none', // Can be 'none' if frontend and backend are different domains and secure: true
+      secure: true, // Should be true in production with HTTPS
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
   }
