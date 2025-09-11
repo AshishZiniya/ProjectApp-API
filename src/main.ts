@@ -8,12 +8,7 @@ async function bootstrap() {
   app.use(helmet());
   app.use(cookieParser());
   app.enableCors({
-    origin: [
-      'https://project-app-indol.vercel.app',
-      'https://project-app-ashishziniyas-projects.vercel.app',
-      'https://project-l7qo10dv6-ashishziniyas-projects.vercel.app',
-      'http://localhost:3000', // for local dev
-    ],
+    origin: 'https://project-app-indol.vercel.app',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization'],
