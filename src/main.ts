@@ -12,8 +12,8 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
-  await app.listen(process.env.PORT ?? 4000, () => {
-    console.log(`Server is running on https://projectapp-api.netlify.app`);
+  await app.listen(process.env.PORT ?? 10000, () => {
+    console.log(`Server is running on https://projectapp-api-k8mo.onrender.com`);
   });
 }
 void bootstrap();
