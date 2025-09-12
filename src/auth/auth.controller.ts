@@ -15,7 +15,9 @@ import { RegisterDto } from './dto/register.dto';
 import type { Request, Response } from 'express'; // <--- IMPORT Request
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -23,6 +25,12 @@ export class AuthController {
     private readonly jwt: JwtService,
   ) {}
 
+  @ApiOperation({ summary: 'Get current user' })
+  @ApiResponse({
+    status: 200,
+    description: 'Current user retrieved successfully.',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @Get('me')
   async getMe(@Req() req: Request) {
     const cookies = req.cookies as Record<string, unknown> | undefined;
@@ -54,6 +62,12 @@ export class AuthController {
     };
   }
 
+  @ApiOperation({ summary: 'Register a new user' })
+  @ApiResponse({
+    status: 201,
+    description: 'User registered successfully.',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request.' })
   @Post('register')
   async register(
     @Body() dto: RegisterDto,
@@ -69,6 +83,9 @@ export class AuthController {
     return { user };
   }
 
+  @ApiOperation({ summary: 'Login a user' })
+  @ApiResponse({ status: 200, description: 'User logged in successfully.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @Post('login')
   async login(
     @Body() dto: LoginDto,
@@ -82,6 +99,9 @@ export class AuthController {
     return { user };
   }
 
+  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiResponse({ status: 200, description: 'Token refreshed successfully.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @Post('refresh')
   async refresh(
     @Req() req: Request,
@@ -129,6 +149,8 @@ export class AuthController {
     };
   }
 
+  @ApiOperation({ summary: 'Logout a user' })
+  @ApiResponse({ status: 200, description: 'User logged out successfully.' })
   @Post('logout')
   @HttpCode(HttpStatus.OK) // Ensure a 200 OK status is returned
   logout(@Res({ passthrough: true }) res: Response) {

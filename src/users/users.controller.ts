@@ -8,11 +8,16 @@ import {
   Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly svc: UsersService) {}
 
+  @ApiOperation({ summary: 'List users with optional search and pagination' })
+  @ApiResponse({ status: 200, description: 'Users retrieved successfully.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @Get()
   list(
     @Query('q') q?: string,
@@ -22,11 +27,22 @@ export class UsersController {
     return this.svc.findAll({ q, page: +page, limit: +limit });
   }
 
+  @ApiOperation({ summary: 'Get user details by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'User details retrieved successfully.',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 404, description: 'User not found.' })
   @Get(':id')
   details(@Param('id') id: string) {
     return this.svc.findone(id);
   }
 
+  @ApiOperation({ summary: 'Update a user by ID' })
+  @ApiResponse({ status: 200, description: 'User updated successfully.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 404, description: 'User not found.' })
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -35,6 +51,10 @@ export class UsersController {
     return this.svc.update(id, dto);
   }
 
+  @ApiOperation({ summary: 'Delete a user by ID' })
+  @ApiResponse({ status: 200, description: 'User deleted successfully.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 404, description: 'User not found.' })
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.svc.remove(id);

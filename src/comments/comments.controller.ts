@@ -15,11 +15,26 @@ import { Comment } from './comment.entity';
 import { AuthGuard } from '@nestjs/passport';
 import type { Request } from 'express';
 import { User } from 'src/users/user.entity';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
+@ApiTags('comments')
 @Controller('comments')
 export class CommentsController {
   constructor(private readonly comments: CommentsService) {}
 
+  @ApiOperation({ summary: 'Create a comment for a task' })
+  @ApiResponse({
+    status: 201,
+    description: 'Comment created successfully.',
+    type: Comment,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiBearerAuth('JWT')
   @UseGuards(AuthGuard('jwt'))
   @Post(':taskId')
   async create(
@@ -34,12 +49,25 @@ export class CommentsController {
     return this.comments.create(taskId, body, user);
   }
 
+  @ApiOperation({ summary: 'Get comments for a specific task' })
+  @ApiResponse({
+    status: 200,
+    description: 'Comments retrieved successfully.',
+    type: [Comment],
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiBearerAuth('JWT')
   @UseGuards(AuthGuard('jwt'))
   @Get(':taskId/taskId') // Corrected route to match frontend
   async findByTask(@Param('taskId') taskId: string): Promise<Comment[]> {
     return this.comments.findByTask(taskId);
   }
 
+  @ApiOperation({ summary: 'Delete a comment by ID' })
+  @ApiResponse({ status: 200, description: 'Comment deleted successfully.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 404, description: 'Comment not found.' })
+  @ApiBearerAuth('JWT')
   @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
   async delete(@Param('id') id: string): Promise<{ message: string }> {
