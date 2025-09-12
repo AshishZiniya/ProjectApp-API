@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User, UserRole } from 'src/users/user.entity';
+import { User, type UserRole } from 'src/users/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
@@ -22,13 +22,19 @@ export class AuthService {
     email: string,
     name: string,
     password: string,
+    role: UserRole,
   ): Promise<AuthResponse> {
     const existing = await this.users.findOne({ where: { email } });
     if (existing) {
       throw new UnauthorizedException('Email already exists');
     }
     const passwordHash = await bcrypt.hash(password, 10);
-    const user = this.users.create({ email, name, password: passwordHash });
+    const user = this.users.create({
+      email,
+      name,
+      password: passwordHash,
+      role,
+    });
     await this.users.save(user);
     return this.issueTokens(user);
   }

@@ -63,6 +63,7 @@ export class AuthController {
       dto.email,
       dto.name,
       dto.password,
+      dto.role,
     );
     this.setCookies(res, access, refresh);
     return { user };
