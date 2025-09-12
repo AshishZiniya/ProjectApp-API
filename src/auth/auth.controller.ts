@@ -175,14 +175,14 @@ export class AuthController {
       sameSite: 'none', // Can be 'none' if frontend and backend are different domains and secure: true
       secure: true, // Should be true in production with HTTPS
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      domain: 'https://project-app-indol.vercel.app',
+      domain: 'project-app-indol.vercel.app',
     });
     res.cookie('refreshToken', refresh, {
       httpOnly: true,
       sameSite: 'none', // Can be 'none' if frontend and backend are different domains and secure: true
       secure: true, // Should be true in production with HTTPS
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      domain: 'https://project-app-indol.vercel.app',
+      domain: 'project-app-indol.vercel.app',
     });
   }
 }
