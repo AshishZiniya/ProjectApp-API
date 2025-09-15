@@ -112,6 +112,8 @@ export class AuthController {
 
     const refreshToken = cookies?.refreshToken;
 
+    console.log('Refresh Token:', refreshToken);
+
     if (typeof refreshToken !== 'string') {
       throw new UnauthorizedException('No refresh token');
     }
