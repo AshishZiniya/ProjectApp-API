@@ -126,7 +126,7 @@ export class AuthController {
     }
 
     const user = await this.auth.validateUserById(payload.sub);
-    if (!user) throw new UnauthorizedException('User  not found');
+    if (!user) throw new UnauthorizedException('User not found');
 
     const access = this.jwt.sign(
       { sub: user.id, email: user.email, role: user.role },
@@ -156,13 +156,13 @@ export class AuthController {
   logout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie('accessToken', {
       httpOnly: true,
-      sameSite: 'lax',
-      secure: false,
+      sameSite: 'none',
+      secure: true,
     });
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      sameSite: 'lax',
-      secure: false,
+      sameSite: 'none',
+      secure: true,
     });
     return { message: 'Logged out successfully' };
   }
