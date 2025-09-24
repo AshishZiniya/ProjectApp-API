@@ -6,6 +6,12 @@ export class EmailService {
   constructor(private readonly mailerService: MailerService) {}
 
   async sendPasswordResetEmail(email: string, resetToken: string) {
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      throw new Error(
+        'Email credentials not configured. Please set EMAIL_USER and EMAIL_PASS environment variables in your deployment settings.',
+      );
+    }
+
     const resetUrl = `${process.env.FRONTEND_URL}/auth/reset-password?token=${resetToken}`;
 
     try {

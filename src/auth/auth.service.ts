@@ -87,15 +87,7 @@ export class AuthService {
     await this.users.save(user);
 
     // Send password reset email
-    try {
-      await this.emailService.sendPasswordResetEmail(email, resetToken);
-    } catch (error) {
-      console.error(
-        'Failed to send password reset email:',
-        error instanceof Error ? error.message : error,
-      );
-      // Continue without failing the request
-    }
+    await this.emailService.sendPasswordResetEmail(email, resetToken);
 
     return { message: 'Password reset email sent' };
   }
