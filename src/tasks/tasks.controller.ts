@@ -86,8 +86,9 @@ export class TasksController {
       title: string;
       description?: string;
       priority?: number;
-      assignedId: string;
-      dueDate: string;
+      status?: 'TODO' | 'IN_PROGRESS' | 'DONE';
+      assigneeId?: string;
+      dueDate?: string;
     },
   ) {
     return this.svc.create(dto);

@@ -52,12 +52,17 @@ export class Task {
   priority: number;
 
   @ApiProperty({
-    description: 'Completion status of the task',
-    example: false,
-    default: false,
+    description: 'Status of the task',
+    example: 'TODO',
+    default: 'TODO',
+    enum: ['TODO', 'IN_PROGRESS', 'DONE'],
   })
-  @Column({ type: 'boolean', default: false })
-  completed: boolean;
+  @Column({
+    type: 'enum',
+    enum: ['TODO', 'IN_PROGRESS', 'DONE'],
+    default: 'TODO',
+  })
+  status: 'TODO' | 'IN_PROGRESS' | 'DONE';
 
   @ApiProperty({
     description: 'Due date of the task',

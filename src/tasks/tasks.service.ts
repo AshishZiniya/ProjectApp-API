@@ -59,6 +59,7 @@ export class TasksService {
     title: string;
     description?: string;
     priority?: number;
+    status?: 'TODO' | 'IN_PROGRESS' | 'DONE';
     assigneeId?: string;
     dueDate?: string;
   }) {
