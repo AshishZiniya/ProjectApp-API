@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-export type UserRole = 'USER' | 'ADMIN';
+export type UserRole = 'USER' | 'ADMIN' | 'SUPERADMIN';
 
 @Entity({ name: 'users' })
 export class User {
@@ -32,10 +32,14 @@ export class User {
 
   @ApiProperty({
     description: 'User role',
-    enum: ['USER', 'ADMIN'],
+    enum: ['USER', 'ADMIN', 'SUPERADMIN'],
     default: 'USER',
   })
-  @Column({ type: 'enum', enum: ['USER', 'ADMIN'], default: 'USER' })
+  @Column({
+    type: 'enum',
+    enum: ['USER', 'ADMIN', 'SUPERADMIN'],
+    default: 'USER',
+  })
   role: UserRole;
 
   @ApiProperty({ description: 'Account creation date' })

@@ -19,7 +19,7 @@ export class RegisterDto {
 
   @ApiProperty({
     description: 'User role',
-    enum: ['USER', 'ADMIN'],
+    enum: ['USER', 'ADMIN', 'SUPERADMIN'],
     default: 'USER',
   })
   @IsString()
