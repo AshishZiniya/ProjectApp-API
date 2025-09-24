@@ -20,6 +20,8 @@ interface AuthResponse {
 
 @Injectable()
 export class AuthService {
+  private blacklistedTokens = new Set<string>();
+
   constructor(
     @InjectRepository(User) private users: Repository<User>,
     private jwt: JwtService,
@@ -71,6 +73,14 @@ export class AuthService {
       return null;
     }
     return user;
+  }
+
+  blacklistToken(token: string) {
+    this.blacklistedTokens.add(token);
+  }
+
+  isTokenBlacklisted(token: string) {
+    return this.blacklistedTokens.has(token);
   }
 
   async forgotPassword(email: string) {

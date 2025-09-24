@@ -7,13 +7,17 @@ import {
   HttpStatus,
   Req,
   Get,
+  UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import type { Request } from 'express';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { User } from '../users/user.entity';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -29,26 +33,10 @@ export class AuthController {
     description: 'Current user retrieved successfully.',
   })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @UseGuards(JwtAuthGuard)
   @Get('me')
-  async getMe(@Req() req: Request) {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new UnauthorizedException('No access token');
-    }
-    const accessToken = authHeader.substring(7);
-
-    let payload: { sub: string; email: string; role: string };
-    try {
-      payload = this.jwt.verify(accessToken, {
-        secret: process.env.JWT_ACCESS_SECRET,
-      });
-    } catch {
-      throw new UnauthorizedException('Invalid or expired token');
-    }
-
-    const user = await this.auth.validateUserById(payload.sub);
-    if (!user) throw new UnauthorizedException('User not found');
-
+  getMe(@Req() req: Request) {
+    const user = req.user as User;
     return {
       user: {
         id: user.id,
@@ -65,6 +53,7 @@ export class AuthController {
     description: 'User registered successfully.',
   })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
+  @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 registrations per minute
   @Post('register')
   async register(@Body() dto: RegisterDto) {
     const { accessToken, refreshToken, user } = await this.auth.register(
@@ -79,6 +68,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Login a user' })
   @ApiResponse({ status: 200, description: 'User logged in successfully.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 login attempts per minute
   @Post('login')
   async login(@Body() dto: LoginDto) {
     const { accessToken, refreshToken, user } = await this.auth.login(
@@ -151,9 +141,14 @@ export class AuthController {
 
   @ApiOperation({ summary: 'Logout a user' })
   @ApiResponse({ status: 200, description: 'User logged out successfully.' })
+  @UseGuards(JwtAuthGuard)
   @Post('logout')
-  @HttpCode(HttpStatus.OK) // Ensure a 200 OK status is returned
-  logout() {
+  @HttpCode(HttpStatus.OK)
+  logout(@Req() req: Request) {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (token) {
+      this.auth.blacklistToken(token);
+    }
     return { message: 'Logged out successfully' };
   }
 }

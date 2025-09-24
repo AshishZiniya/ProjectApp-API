@@ -8,6 +8,7 @@ import { EmailModule } from './email/email.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { User } from './users/user.entity';
 import { Project } from './projects/project.entity';
 import { Task } from './tasks/task.entity';
@@ -15,6 +16,12 @@ import { Comment } from './comments/comment.entity';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 1 minute
+        limit: 10, // 10 requests per minute
+      },
+    ]),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
