@@ -1,18 +1,16 @@
-// FileName: MultipleFiles/auth.controller.ts
 import {
   Controller,
   Post,
   Body,
-  Res,
   UnauthorizedException,
   HttpCode,
   HttpStatus,
   Req,
-  Get, // <--- IMPORT Req
+  Get,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
-import type { Request, Response } from 'express'; // <--- IMPORT Request
+import type { Request } from 'express';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -33,12 +31,11 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @Get('me')
   async getMe(@Req() req: Request) {
-    const cookies = req.cookies as Record<string, unknown> | undefined;
-    const accessToken = cookies?.accessToken;
-
-    if (!accessToken || typeof accessToken !== 'string') {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw new UnauthorizedException('No access token');
     }
+    const accessToken = authHeader.substring(7);
 
     let payload: { sub: string; email: string; role: string };
     try {
@@ -69,52 +66,34 @@ export class AuthController {
   })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
   @Post('register')
-  async register(
-    @Body() dto: RegisterDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async register(@Body() dto: RegisterDto) {
     const { accessToken, refreshToken, user } = await this.auth.register(
       dto.email,
       dto.name,
       dto.password,
       dto.role,
     );
-    this.setCookies(res, accessToken, refreshToken);
-    return { user };
+    return { accessToken, refreshToken, user };
   }
 
   @ApiOperation({ summary: 'Login a user' })
   @ApiResponse({ status: 200, description: 'User logged in successfully.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @Post('login')
-  async login(
-    @Body() dto: LoginDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async login(@Body() dto: LoginDto) {
     const { accessToken, refreshToken, user } = await this.auth.login(
       dto.email,
       dto.password,
     );
-    this.setCookies(res, accessToken, refreshToken);
-    return { user };
+    return { accessToken, refreshToken, user };
   }
 
   @ApiOperation({ summary: 'Refresh access token' })
   @ApiResponse({ status: 200, description: 'Token refreshed successfully.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @Post('refresh')
-  async refresh(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    // Narrow the type of cookies to a known shape
-    const cookies = req.cookies as Record<string, unknown> | undefined;
-
-    const refreshToken = cookies?.refreshToken;
-
-    console.log('Refresh Token:', refreshToken);
-
-    if (typeof refreshToken !== 'string') {
+  async refresh(@Body('refreshToken') refreshToken: string) {
+    if (!refreshToken) {
       throw new UnauthorizedException('No refresh token');
     }
 
@@ -139,9 +118,9 @@ export class AuthController {
       { secret: process.env.JWT_REFRESH_SECRET, expiresIn: '7d' },
     );
 
-    this.setCookies(res, accessToken, newRefreshToken);
-
     return {
+      accessToken,
+      refreshToken: newRefreshToken,
       user: {
         id: user.id,
         email: user.email,
@@ -155,39 +134,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'User logged out successfully.' })
   @Post('logout')
   @HttpCode(HttpStatus.OK) // Ensure a 200 OK status is returned
-  logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('accessToken', {
-      httpOnly: true,
-      sameSite: 'none',
-      secure: true,
-    });
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      sameSite: 'none',
-      secure: true,
-    });
+  logout() {
     return { message: 'Logged out successfully' };
-  }
-
-  private setCookies(res: Response, access: string, refresh: string) {
-    const isProduction = process.env.NODE_ENV === 'production';
-    const domain = undefined; // For cross-site, don't set domain
-    const sameSite: 'none' | 'lax' = isProduction ? 'none' : 'lax';
-    const secure = isProduction;
-
-    res.cookie('accessToken', access, {
-      httpOnly: true,
-      sameSite,
-      secure,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      domain,
-    });
-    res.cookie('refreshToken', refresh, {
-      httpOnly: true,
-      sameSite,
-      secure,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      domain,
-    });
   }
 }

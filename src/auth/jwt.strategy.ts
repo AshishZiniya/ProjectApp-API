@@ -1,8 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, StrategyOptions } from 'passport-jwt';
-import type { JwtFromRequestFunction } from 'passport-jwt';
-import type { Request } from 'express';
+import { Strategy, StrategyOptions, ExtractJwt } from 'passport-jwt';
 import { AuthService } from './auth.service';
 
 @Injectable()
@@ -13,21 +11,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       throw new Error('JWT_ACCESS_SECRET environment variable is not set');
     }
 
-    const cookieExtractor: JwtFromRequestFunction = (
-      req: Request | undefined,
-    ): string | null => {
-      if (!req) {
-        return null;
-      }
-      const cookies = req.cookies as Record<string, unknown> | undefined;
-      if (typeof cookies?.['accessToken'] === 'string') {
-        return cookies['accessToken'];
-      }
-      return null;
-    };
-
     const options: StrategyOptions = {
-      jwtFromRequest: cookieExtractor,
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: jwtSecret,
     };
