@@ -44,6 +44,16 @@ export class TasksService {
     limit: number;
   }) {
     const [data, total] = await this.tasks.findAndCount({
+      select: [
+        'id',
+        'title',
+        'description',
+        'priority',
+        'dueDate',
+        'createdAt',
+        'updatedAt',
+        'project',
+      ], // Exclude status until migration is run
       where: { project: { id: projectId } },
       relations: ['project'],
       order: { createdAt: 'DESC' },
