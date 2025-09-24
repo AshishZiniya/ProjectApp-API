@@ -38,6 +38,13 @@ export class User {
   @Column({ type: 'enum', enum: ['USER', 'ADMIN'], default: 'USER' })
   role: UserRole;
 
+  @ApiProperty({
+    description: 'Access token for the user',
+    example: 'jwt-access-token',
+  })
+  @Column({ type: 'text', nullable: true })
+  accessToken?: string;
+
   @ApiProperty({ description: 'Account creation date' })
   @CreateDateColumn()
   createdAt: Date;

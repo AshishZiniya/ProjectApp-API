@@ -170,21 +170,24 @@ export class AuthController {
   }
 
   private setCookies(res: Response, access: string, refresh: string) {
-    // For development, 'lax' and 'false' are usually fine.
-    // For production with different domains, consider 'none' and 'true' (requires HTTPS).
+    const isProduction = process.env.NODE_ENV === 'production';
+    const domain = isProduction ? 'project-app-indol.vercel.app' : undefined;
+    const sameSite: 'none' | 'lax' = isProduction ? 'none' : 'lax';
+    const secure = isProduction;
+
     res.cookie('accessToken', access, {
       httpOnly: true,
-      sameSite: 'none', // Can be 'none' if frontend and backend are different domains and secure: true
-      secure: true, // Should be true in production with HTTPS
+      sameSite,
+      secure,
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      domain: 'project-app-indol.vercel.app',
+      domain,
     });
     res.cookie('refreshToken', refresh, {
       httpOnly: true,
-      sameSite: 'none', // Can be 'none' if frontend and backend are different domains and secure: true
-      secure: true, // Should be true in production with HTTPS
+      sameSite,
+      secure,
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      domain: 'project-app-indol.vercel.app',
+      domain,
     });
   }
 }

@@ -36,7 +36,10 @@ export class AuthService {
       role,
     });
     await this.users.save(user);
-    return this.issueTokens(user);
+    const tokens = await this.issueTokens(user);
+    user.accessToken = tokens.access;
+    await this.users.save(user);
+    return tokens;
   }
 
   async login(email: string, password: string) {
@@ -48,7 +51,10 @@ export class AuthService {
     if (!user || !(await bcrypt.compare(password, user.password))) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    return this.issueTokens(user);
+    const tokens = await this.issueTokens(user);
+    user.accessToken = tokens.access;
+    await this.users.save(user);
+    return tokens;
   }
 
   async validateUserById(userId: string) {
