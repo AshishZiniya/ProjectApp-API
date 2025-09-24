@@ -32,7 +32,11 @@ export class AuthService {
     password: string,
     role: UserRole,
   ): Promise<AuthResponse> {
-    const existing = await this.users.findOne({ where: { email } });
+    const existing = await this.users
+      .createQueryBuilder('u')
+      .select('u.id')
+      .where('u.email = :email', { email })
+      .getOne();
     if (existing) {
       throw new UnauthorizedException('Email already exists');
     }
@@ -83,7 +87,15 @@ export class AuthService {
     await this.users.save(user);
 
     // Send password reset email
-    await this.emailService.sendPasswordResetEmail(email, resetToken);
+    try {
+      await this.emailService.sendPasswordResetEmail(email, resetToken);
+    } catch (error) {
+      console.error(
+        'Failed to send password reset email:',
+        error instanceof Error ? error.message : error,
+      );
+      // Continue without failing the request
+    }
 
     return { message: 'Password reset email sent' };
   }
