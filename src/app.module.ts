@@ -4,8 +4,10 @@ import { UsersModule } from './users/users.module';
 import { ProjectsModule } from './projects/projects.module';
 import { TasksModule } from './tasks/tasks.module';
 import { CommentsModule } from './comments/comments.module';
+import { EmailModule } from './email/email.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MailerModule } from '@nestjs-modules/mailer';
 import { User } from './users/user.entity';
 import { Project } from './projects/project.entity';
 import { Task } from './tasks/task.entity';
@@ -15,6 +17,20 @@ import { Comment } from './comments/comment.entity';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    MailerModule.forRoot({
+      transport: {
+        host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+        port: Number(process.env.EMAIL_PORT) || 587,
+        secure: false, // true for 465, false for other ports
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      },
+      defaults: {
+        from: `"No Reply" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
+      },
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -38,6 +54,7 @@ import { Comment } from './comments/comment.entity';
     ProjectsModule,
     TasksModule,
     CommentsModule,
+    EmailModule,
   ],
 })
 export class AppModule {}

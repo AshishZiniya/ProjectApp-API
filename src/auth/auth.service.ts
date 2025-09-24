@@ -1,9 +1,16 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User, type UserRole } from 'src/users/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
+import { randomBytes } from 'crypto';
+import { EmailService } from 'src/email/email.service';
 
 interface AuthResponse {
   accessToken: string;
@@ -16,6 +23,7 @@ export class AuthService {
   constructor(
     @InjectRepository(User) private users: Repository<User>,
     private jwt: JwtService,
+    private emailService: EmailService,
   ) {}
 
   async register(
@@ -56,10 +64,46 @@ export class AuthService {
   async validateUserById(userId: string) {
     const user = await this.users.findOneBy({ id: userId });
     if (!user) {
-      console.log('User not found for ID:', userId);
       return null;
     }
     return user;
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.users.findOne({ where: { email } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const resetToken = randomBytes(32).toString('hex');
+    const resetTokenExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+    user.resetToken = resetToken;
+    user.resetTokenExpiry = resetTokenExpiry;
+    await this.users.save(user);
+
+    // Send password reset email
+    await this.emailService.sendPasswordResetEmail(email, resetToken);
+
+    return { message: 'Password reset email sent' };
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const user = await this.users.findOne({
+      where: { resetToken: token },
+    });
+
+    if (!user || !user.resetTokenExpiry || user.resetTokenExpiry < new Date()) {
+      throw new BadRequestException('Invalid or expired token');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    user.password = passwordHash;
+    user.resetToken = undefined;
+    user.resetTokenExpiry = undefined;
+    await this.users.save(user);
+
+    return { message: 'Password reset successfully' };
   }
 
   private async issueTokens(user: User) {

@@ -45,10 +45,12 @@ export class Comment {
     example: '2023-10-01T12:34:56.789Z',
   })
   @CreateDateColumn()
+  createdAt: Date;
+
   @ApiProperty({
     description: 'Timestamp when the comment was last updated',
     example: '2023-10-02T12:34:56.789Z',
   })
-  createdAt: Date;
-  @UpdateDateColumn() updatedAt: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

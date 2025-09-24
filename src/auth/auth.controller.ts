@@ -130,6 +130,25 @@ export class AuthController {
     };
   }
 
+  @ApiOperation({ summary: 'Request password reset' })
+  @ApiResponse({ status: 200, description: 'Reset token generated.' })
+  @ApiResponse({ status: 404, description: 'User not found.' })
+  @Post('forgot-password')
+  async forgotPassword(@Body('email') email: string) {
+    return this.auth.forgotPassword(email);
+  }
+
+  @ApiOperation({ summary: 'Reset password with token' })
+  @ApiResponse({ status: 200, description: 'Password reset successfully.' })
+  @ApiResponse({ status: 400, description: 'Invalid or expired token.' })
+  @Post('reset-password')
+  async resetPassword(
+    @Body('token') token: string,
+    @Body('newPassword') newPassword: string,
+  ) {
+    return this.auth.resetPassword(token, newPassword);
+  }
+
   @ApiOperation({ summary: 'Logout a user' })
   @ApiResponse({ status: 200, description: 'User logged out successfully.' })
   @Post('logout')

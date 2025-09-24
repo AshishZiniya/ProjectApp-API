@@ -48,10 +48,6 @@ async function bootstrap() {
     },
   });
 
-  await app.listen(process.env.PORT ?? 10000, () => {
-    console.log(
-      `Server is running on https://projectapp-api-k8mo.onrender.com`,
-    );
-  });
+  await app.listen(process.env.PORT ?? 10000);
 }
 void bootstrap();

@@ -22,7 +22,6 @@ export class CommentsGateway {
     @MessageBody() taskId: string,
   ): Promise<void> {
     await client.join(taskId);
-    console.log(`Client ${client.id} joined room for task ${taskId}`);
   }
 
   @SubscribeMessage('leaveTaskComments')
@@ -31,6 +30,5 @@ export class CommentsGateway {
     @MessageBody() taskId: string,
   ): Promise<void> {
     await client.leave(taskId);
-    console.log(`Client ${client.id} left room for task ${taskId}`);
   }
 }

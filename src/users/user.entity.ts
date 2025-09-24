@@ -42,6 +42,14 @@ export class User {
   @CreateDateColumn()
   createdAt: Date;
 
+  @ApiProperty({ description: 'Password reset token' })
+  @Column({ nullable: true })
+  resetToken?: string;
+
+  @ApiProperty({ description: 'Password reset token expiry' })
+  @Column({ type: 'timestamp', nullable: true })
+  resetTokenExpiry?: Date;
+
   @ApiProperty({ description: 'Account last update date' })
   @UpdateDateColumn()
   updatedAt: Date;
