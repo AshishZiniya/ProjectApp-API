@@ -16,6 +16,16 @@ export class TasksService {
   // tasks.service.ts
   async Alllist({ page, limit }: { page: number; limit: number }) {
     const [data, total] = await this.tasks.findAndCount({
+      select: [
+        'id',
+        'title',
+        'description',
+        'priority',
+        'dueDate',
+        'createdAt',
+        'updatedAt',
+        'project',
+      ], // Exclude status until migration is run
       relations: ['project'], // Still include project relation for context
       order: { createdAt: 'DESC' },
       skip: (page - 1) * limit,
