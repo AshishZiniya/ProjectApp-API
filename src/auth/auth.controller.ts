@@ -73,13 +73,13 @@ export class AuthController {
     @Body() dto: RegisterDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { access, refresh, user } = await this.auth.register(
+    const { accessToken, refreshToken, user } = await this.auth.register(
       dto.email,
       dto.name,
       dto.password,
       dto.role,
     );
-    this.setCookies(res, access, refresh);
+    this.setCookies(res, accessToken, refreshToken);
     return { user };
   }
 
@@ -91,11 +91,11 @@ export class AuthController {
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { access, refresh, user } = await this.auth.login(
+    const { accessToken, refreshToken, user } = await this.auth.login(
       dto.email,
       dto.password,
     );
-    this.setCookies(res, access, refresh);
+    this.setCookies(res, accessToken, refreshToken);
     return { user };
   }
 
@@ -130,16 +130,16 @@ export class AuthController {
     const user = await this.auth.validateUserById(payload.sub);
     if (!user) throw new UnauthorizedException('User not found');
 
-    const access = this.jwt.sign(
+    const accessToken = this.jwt.sign(
       { sub: user.id, email: user.email, role: user.role },
       { secret: process.env.JWT_ACCESS_SECRET, expiresIn: '15m' },
     );
-    const newRefresh = this.jwt.sign(
+    const newRefreshToken = this.jwt.sign(
       { sub: user.id, email: user.email, role: user.role },
       { secret: process.env.JWT_REFRESH_SECRET, expiresIn: '7d' },
     );
 
-    this.setCookies(res, access, newRefresh);
+    this.setCookies(res, accessToken, newRefreshToken);
 
     return {
       user: {
@@ -171,7 +171,7 @@ export class AuthController {
 
   private setCookies(res: Response, access: string, refresh: string) {
     const isProduction = process.env.NODE_ENV === 'production';
-    const domain = isProduction ? 'project-app-indol.vercel.app' : undefined;
+    const domain = undefined; // For cross-site, don't set domain
     const sameSite: 'none' | 'lax' = isProduction ? 'none' : 'lax';
     const secure = isProduction;
 

@@ -6,8 +6,8 @@ import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 
 interface AuthResponse {
-  access: string;
-  refresh: string;
+  accessToken: string;
+  refreshToken: string;
   user: { id: string; email: string; name: string; role: UserRole };
 }
 
@@ -37,8 +37,6 @@ export class AuthService {
     });
     await this.users.save(user);
     const tokens = await this.issueTokens(user);
-    user.accessToken = tokens.access;
-    await this.users.save(user);
     return tokens;
   }
 
@@ -52,8 +50,6 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
     const tokens = await this.issueTokens(user);
-    user.accessToken = tokens.access;
-    await this.users.save(user);
     return tokens;
   }
 
@@ -68,17 +64,17 @@ export class AuthService {
 
   private async issueTokens(user: User) {
     const payload = { sub: user.id, email: user.email, role: user.role };
-    const access = await this.jwt.signAsync(payload, {
+    const accessToken = await this.jwt.signAsync(payload, {
       secret: process.env.JWT_ACCESS_SECRET,
       expiresIn: '15m',
     });
-    const refresh = await this.jwt.signAsync(payload, {
+    const refreshToken = await this.jwt.signAsync(payload, {
       secret: process.env.JWT_REFRESH_SECRET,
       expiresIn: '7d',
     });
     return {
-      access,
-      refresh,
+      accessToken,
+      refreshToken,
       user: {
         id: user.id,
         email: user.email,
