@@ -18,12 +18,26 @@ async function bootstrap() {
   app.use(helmet());
   app.use(cookieParser());
   app.enableCors({
-    origin: [
-      'https://project-app-indol.vercel.app',
-      'http://localhost:3000',
-      'https://projectapp-api-k8mo.onrender.com',
-      'http://localhost:10000',
-    ],
+    origin: function (
+      origin: string | undefined,
+      callback: (error: Error | null, allow?: boolean) => void,
+    ) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      const allowedOrigins: string[] = [
+        'https://project-app-indol.vercel.app',
+        'http://localhost:3000',
+        'https://projectapp-api-k8mo.onrender.com',
+        'http://localhost:10000',
+      ];
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'), false);
+      }
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     allowedHeaders: [
