@@ -58,7 +58,7 @@ export class CommentsController {
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiBearerAuth('JWT')
   @UseGuards(AuthGuard('jwt'))
-  @Get(':taskId/taskId') // Corrected route to match frontend
+  @Get('task/:taskId')
   async findByTask(@Param('taskId') taskId: string): Promise<Comment[]> {
     return this.comments.findByTask(taskId);
   }
